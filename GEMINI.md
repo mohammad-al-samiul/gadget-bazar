@@ -1,1 +1,1 @@
-Read AGENTS.md and follow .agent/rules
+Read AGENTS.md and follow .agents/rules

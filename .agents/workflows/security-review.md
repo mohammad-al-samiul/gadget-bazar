@@ -6,7 +6,7 @@ description: Perform comprehensive security audit against 01-security.md, OWASP 
 
 ## Workflow Steps
 1. **Audit Scope**:
-   - Compare all changed code against `.agent/rules/01-security.md` and the OWASP Top 10 vulnerabilities.
+   - Compare all changed code against `.agents/rules/01-security.md` and the OWASP Top 10 vulnerabilities.
 2. **Key Security Checkpoints**:
    - **Input Validation**: DTO schemas, Zod validation, zero raw SQL injection vectors.
    - **RBAC & Authorization**: Server-side checks (e.g. dealer endpoints requiring `kyc_status = approved`, riders scoped to assigned tasks only, admin privileges).
