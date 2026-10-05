@@ -1,0 +1,15 @@
+{
+  "name": "@gadgetbazar/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\""
+  },
+  "devDependencies": {
+    "@gadgetbazar/config": "workspace:*",
+    "typescript": "^5.8.2"
+  }
+}
