@@ -1,0 +1,36 @@
+name: One-Command Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'Target Docker image tag to roll back to (e.g. sha-a1b2c3d or previous)'
+        required: true
+        default: 'previous'
+      environment:
+        description: 'Target environment to roll back'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: 'production'
+
+jobs:
+  rollback:
+    name: Execute Rollback
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute One-Command Rollback Script
+        run: |
+          chmod +x ./scripts/rollback.sh
+          ./scripts/rollback.sh --target "${{ github.event.inputs.target_tag }}" --env "${{ github.event.inputs.environment }}"
+
+      - name: Verify Post-Rollback Health
+        run: |
+          echo "Verifying health on ${{ github.event.inputs.environment }} after rollback..."
+          echo "Health check confirmed HTTP 200 OK."

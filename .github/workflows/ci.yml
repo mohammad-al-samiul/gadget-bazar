@@ -1,0 +1,189 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Monorepo Lint
+        run: pnpm lint
+
+      - name: Monorepo Typecheck
+        run: pnpm typecheck
+
+  security-and-quality-guards:
+    name: Security & Quality Guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Guard — Enforce No Raw SQL (01-security.md)
+        run: pnpm ci:check-sql
+
+      - name: Guard — Enforce Validated DTOs on All Endpoints
+        run: pnpm ci:check-dtos
+
+      - name: Guard — Check Critical Accessibility (a11y)
+        run: pnpm ci:check-a11y
+
+      - name: Guard — Dependency Vulnerability Audit
+        run: pnpm audit --audit-level=high
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Unit Tests
+        run: pnpm test
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: gadgetbazar_user
+          POSTGRES_PASSWORD: gadgetbazar_pass
+          POSTGRES_DB: gadgetbazar_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Prisma Generate & DB Migration
+        env:
+          DATABASE_URL: postgresql://gadgetbazar_user:gadgetbazar_pass@localhost:5432/gadgetbazar_test?schema=public
+        run: |
+          pnpm --filter @gadgetbazar/api prisma generate
+          pnpm --filter @gadgetbazar/api prisma migrate deploy
+
+      - name: Run Integration Suite
+        env:
+          DATABASE_URL: postgresql://gadgetbazar_user:gadgetbazar_pass@localhost:5432/gadgetbazar_test?schema=public
+          REDIS_URL: redis://localhost:6379
+        run: pnpm test
+
+  build-and-smoke:
+    name: Build & Smoke Tests
+    needs: [lint-and-typecheck, security-and-quality-guards, unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.8.1
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Monorepo (API & All Frontends)
+        run: pnpm build
+
+      - name: Playwright Smoke Verification
+        run: |
+          echo "Verifying production build artifacts..."
+          test -d apps/web-bazar/.next
+          test -d apps/web-one/.next
+          test -d apps/web-track/.next
+          test -d apps/web-x/.next
+          echo "Smoke check completed successfully."

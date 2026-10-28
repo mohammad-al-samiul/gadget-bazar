@@ -12,6 +12,7 @@ This log records major business and architectural decisions made throughout the 
 | **ADR-002** | 2026-10-04 | Approved | Two-Stage Payment Architecture                       | Core Team |
 | **ADR-003** | 2026-10-04 | Approved | Agent Operation, Terminal Safety & Browser Allowlist | Core Team |
 | **ADR-004** | 2026-10-28 | Approved | Capacity Targets, SLO Policy & Bottleneck Strategy   | Core Team |
+| **ADR-005** | 2026-10-28 | Approved | Automated CI/CD Pipeline & Zero-Downtime Deployments | Core Team |
 
 ---
 
@@ -76,3 +77,18 @@ This log records major business and architectural decisions made throughout the 
   - All subsequent infrastructure, caching, and queue tasks must be designed to satisfy these SLOs.
   - Every k6 load-test scenario in TASK Q2 must have a pass/fail threshold derived from this document.
   - SLO breach triggers a change freeze per the error budget policy.
+
+---
+
+### ADR-005: Automated CI/CD Pipeline & Zero-Downtime Deployments
+
+- **Date**: 2026-10-28
+- **Status**: Approved
+- **Context**: Continuous integration and deployment must enforce non-negotiable security boundaries (no raw SQL, DTO input validation, critical a11y, CVE scanning), ensure safe backward-compatible database migrations, and support zero-downtime rolling deploys with one-command rollback.
+- **Decision**:
+  - **CI Workflow (`ci.yml`)**: Triggered on all PRs to `main`. Sequences: `lint` -> `typecheck` -> automated guards (`check-no-raw-sql`, `check-dtos`, `check-a11y`, `pnpm audit --audit-level=high`) -> unit tests -> integration tests (real Postgres+pgvector and Redis containers) -> full monorepo build -> smoke verification.
+  - **CD Workflow (`cd.yml`)**: Triggered on merge to `main`. Pre-deployment migration via `prisma migrate deploy` (strictly following expand/contract methodology). Container images built and published to GHCR. Automatic deployment to staging. Manual environment approval gate for production release.
+  - **Rolling Restarts**: Deployment uses `order: start-first` to ensure new instances are healthy on `/v1/health` before terminating previous instances.
+  - **One-Command Rollback**: Provided via `./scripts/rollback.sh` and `.github/workflows/rollback.yml` for instant, safe recovery.
+- **Consequences**:
+  - Direct commits to `main` without CI verification are prohibited. Destructive schema alterations must follow the two-release expand/contract protocol.

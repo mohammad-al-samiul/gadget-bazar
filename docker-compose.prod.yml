@@ -1,0 +1,103 @@
+# Production / Staging Docker Compose definition for GadgetBazar
+# Implements zero-downtime rolling update (start-first) and health-checked restart
+
+version: '3.8'
+
+services:
+  api:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohammad-al-samiul/gadget-bazar}/api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '4000:4000'
+    env_file: .env.production
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+    deploy:
+      replicas: 2
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/v1/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  worker:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohammad-al-samiul/gadget-bazar}/api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    command: ['node', 'apps/api/dist/main.js', '--worker']
+    env_file: .env.production
+    environment:
+      - NODE_ENV=production
+    deploy:
+      replicas: 2
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 5s
+
+  web-bazar:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohammad-al-samiul/gadget-bazar}/web-bazar:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    env_file: .env.production
+    deploy:
+      replicas: 2
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  web-one:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohammad-al-samiul/gadget-bazar}/web-one:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    env_file: .env.production
+    deploy:
+      replicas: 2
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+
+  web-track:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohammad-al-samiul/gadget-bazar}/web-track:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '3002:3000'
+    env_file: .env.production
+    deploy:
+      replicas: 2
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+
+  web-x:
+    image: ${IMAGE_REGISTRY:-ghcr.io/mohammad-al-samiul/gadget-bazar}/web-x:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - '3003:3000'
+    env_file: .env.production
+    deploy:
+      replicas: 2
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s

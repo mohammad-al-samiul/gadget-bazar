@@ -11,6 +11,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "gen:client": "node scripts/gen-client.js",
+    "ci:check-sql": "node scripts/ci/check-no-raw-sql.js",
+    "ci:check-dtos": "node scripts/ci/check-dtos.js",
+    "ci:check-a11y": "node scripts/ci/check-a11y.js",
+    "ci:verify": "pnpm ci:check-sql && pnpm ci:check-dtos && pnpm ci:check-a11y && pnpm lint && pnpm typecheck && pnpm test",
     "prepare": "husky"
   },
   "devDependencies": {

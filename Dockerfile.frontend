@@ -1,0 +1,42 @@
+# Multi-stage Dockerfile for Next.js Frontends (web-bazar, web-one, web-track, web-x)
+
+ARG APP_NAME=web-bazar
+
+# Stage 1: Dependencies & Builder
+FROM node:20-alpine AS builder
+ARG APP_NAME
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+RUN npm install -g pnpm@12.8.1
+
+COPY . .
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @gadgetbazar/design-tokens build
+RUN pnpm --filter @gadgetbazar/shared build
+RUN pnpm --filter @gadgetbazar/ui build
+RUN pnpm --filter @gadgetbazar/${APP_NAME} build
+
+# Stage 2: Runner
+FROM node:20-alpine AS runner
+ARG APP_NAME
+WORKDIR /app
+RUN apk add --no-cache dumb-init curl
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+USER node
+
+# Copy standalone build
+COPY --chown=node:node --from=builder /app/apps/${APP_NAME}/public ./apps/${APP_NAME}/public
+COPY --chown=node:node --from=builder /app/apps/${APP_NAME}/.next/standalone ./
+COPY --chown=node:node --from=builder /app/apps/${APP_NAME}/.next/static ./apps/${APP_NAME}/.next/static
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:3000 || exit 1
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["node", "apps/${APP_NAME}/server.js"]
