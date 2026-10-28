@@ -12,6 +12,8 @@ export interface ApiResponse<T> {
 export interface ClientConfig {
   baseUrl: string;
   getAuthToken?: () => string | null | Promise<string | null>;
+  onRefreshToken?: () => Promise<string | null>;
+  onAuthFailure?: () => void;
   timeoutMs?: number;
 }
 

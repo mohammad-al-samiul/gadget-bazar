@@ -11,3 +11,5 @@ allowBuilds:
   prisma: true
   '@scarf/scarf': false
   'msgpackr-extract': false
+  '@parcel/watcher': false
+  '@swc/core': false

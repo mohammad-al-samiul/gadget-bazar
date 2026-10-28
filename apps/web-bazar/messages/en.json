@@ -1,0 +1,29 @@
+{
+  "Common": {
+    "brandName": "GadgetBazar",
+    "tagline": "Direct China-Import Gadget Marketplace for Bangladesh",
+    "language": "English",
+    "switchLanguage": "বাংলা",
+    "twoStageNotice": "Transparent Two-Stage Payment: Pay only the product price at checkout. Shipping & customs are charged only AFTER goods arrive in Bangladesh and are weighed."
+  },
+  "Nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "groupDeals": "Group Deals",
+    "dealerPortal": "Dealer Portal",
+    "tracking": "Track Order",
+    "cart": "Cart",
+    "account": "Account"
+  },
+  "Homepage": {
+    "heroTitle": "100% Genuine China Gadgets Direct to Your Doorstep",
+    "heroSubtitle": "Zero hidden fees. Transparent two-stage payments with real-time Air & Sea cargo tracking.",
+    "buyNow": "Buy Now",
+    "joinDeal": "Join Group Deal",
+    "howItWorks": "How GadgetBazar Works",
+    "step1Title": "Stage 1: Choose Product & Pay Product Cost",
+    "step1Desc": "Pay strictly the product price at checkout. Sourcing starts immediately directly with Chinese manufacturers.",
+    "step2Title": "Stage 2: Pay Shipping After Physical Weighing in BD",
+    "step2Desc": "Once goods reach Bangladesh customs & warehouse, items are weighed with precision. Pay shipping and your rider delivers to your doorstep."
+  }
+}

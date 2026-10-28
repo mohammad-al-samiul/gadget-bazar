@@ -9,7 +9,11 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@gadgetbazar/design-tokens": "workspace:*"
+    "@gadgetbazar/design-tokens": "workspace:*",
+    "@gadgetbazar/shared": "workspace:*",
+    "@tanstack/react-query": "^5.105.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.7.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
