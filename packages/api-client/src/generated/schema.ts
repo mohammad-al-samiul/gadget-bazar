@@ -55,10 +55,358 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/catalog/categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get 2-level category tree (parents and subcategories) */
+    get: operations['CatalogController_getCategories'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/catalog/products': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Public product listing with cursor pagination, category/price/stock filters and sorting */
+    get: operations['CatalogController_getProducts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/catalog/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Full-text search with bilingual analyzer (Bengali + English) and typo tolerance */
+    get: operations['CatalogController_search'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/catalog/compare': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Compare 2 to 4 products across common specifications, weights, and price points */
+    get: operations['CatalogController_compare'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/catalog/products/{idOrSku}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get single product details by UUID or SKU */
+    get: operations['CatalogController_getProduct'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/catalog/products/{id}/bundle-suggestions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get accessory and complementary product bundle suggestions with bundled discount pricing */
+    get: operations['CatalogController_getBundleSuggestions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/catalog/products': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create new product with variants and media */
+    post: operations['AdminCatalogController_createProduct'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/catalog/products/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Soft-delete product and remove from search index */
+    delete: operations['AdminCatalogController_deleteProduct'];
+    options?: never;
+    head?: never;
+    /** Update product details, pricing, and specs */
+    patch: operations['AdminCatalogController_updateProduct'];
+    trace?: never;
+  };
+  '/v1/admin/catalog/categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a primary or 2nd-level subcategory */
+    post: operations['AdminCatalogController_createCategory'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/admin/catalog/categories/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update category */
+    patch: operations['AdminCatalogController_updateCategory'];
+    trace?: never;
+  };
+  '/v1/admin/catalog/reindex': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Trigger complete catalog sync & Elasticsearch reindexing */
+    post: operations['AdminCatalogController_reindex'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: never;
+  schemas: {
+    CreateProductVariantDto: {
+      /** @example 8GB / 128GB - Midnight Black */
+      name: string;
+      /** @example -BLK-128 */
+      skuSuffix: string;
+      /**
+       * @default 0
+       * @example 0
+       */
+      priceAdjustmentBdt: number;
+      /**
+       * @default 0
+       * @example 50
+       */
+      stock: number;
+    };
+    CreateProductMediaDto: {
+      /** @example https://cdn.gadgetbazar.com/products/img1.webp */
+      url: string;
+      /**
+       * @default IMAGE
+       * @enum {string}
+       */
+      mediaType: 'IMAGE' | 'VIDEO';
+      /**
+       * @default 0
+       * @example 0
+       */
+      sortOrder: number;
+      /** @example Front view */
+      altText?: string;
+    };
+    CreateProductDto: {
+      /** @example GB-PHONE-001 */
+      sku: string;
+      /** @example 123e4567-e89b-12d3-a456-426614174000 */
+      categoryId: string;
+      /** @example শাওমি রেডমি নোট ১৩ প্রো */
+      titleBn: string;
+      /** @example Xiaomi Redmi Note 13 Pro 5G */
+      titleEn: string;
+      /** @example ২০০ মেগাপিক্সেল ওআইএস ক্যামেরা সহ পাওয়ারফুল স্মার্টফোন। */
+      descriptionBn?: string;
+      /** @example Flagship-level 200MP camera with OIS and 67W turbo charge. */
+      descriptionEn?: string;
+      /**
+       * @description CONFIDENTIAL: Sourcing cost in CNY (Admin only, never returned to public)
+       * @example 1250
+       */
+      sourcingPriceCny: number;
+      /** @example 26500 */
+      retailPriceBdt: number;
+      /** @example 23500 */
+      dealerPriceBdt?: number;
+      /**
+       * @default 1
+       * @example 1
+       */
+      moq: number;
+      /**
+       * @default true
+       * @example true
+       */
+      singlePieceAvailable: boolean;
+      /**
+       * @description Estimated shipping rate per kg BDT (labelled as ESTIMATE at API)
+       * @example 950
+       */
+      avgShippingRatePerKgBdt: number;
+      /**
+       * @default 0
+       * @example 12
+       */
+      warrantyMonths: number;
+      /**
+       * @default false
+       * @example true
+       */
+      isGenuineCertified: boolean;
+      /**
+       * @description Weight in integer grams
+       * @example 187
+       */
+      estimatedWeightGrams: number;
+      variants?: components['schemas']['CreateProductVariantDto'][];
+      media?: components['schemas']['CreateProductMediaDto'][];
+    };
+    UpdateProductDto: {
+      /** @example GB-PHONE-001 */
+      sku?: string;
+      /** @example 123e4567-e89b-12d3-a456-426614174000 */
+      categoryId?: string;
+      /** @example শাওমি রেডমি নোট ১৩ প্রো */
+      titleBn?: string;
+      /** @example Xiaomi Redmi Note 13 Pro 5G */
+      titleEn?: string;
+      /** @example ২০০ মেগাপিক্সেল ওআইএস ক্যামেরা সহ পাওয়ারফুল স্মার্টফোন। */
+      descriptionBn?: string;
+      /** @example Flagship-level 200MP camera with OIS and 67W turbo charge. */
+      descriptionEn?: string;
+      /**
+       * @description CONFIDENTIAL: Sourcing cost in CNY (Admin only, never returned to public)
+       * @example 1250
+       */
+      sourcingPriceCny?: number;
+      /** @example 26500 */
+      retailPriceBdt?: number;
+      /** @example 23500 */
+      dealerPriceBdt?: number;
+      /**
+       * @default 1
+       * @example 1
+       */
+      moq: number;
+      /**
+       * @default true
+       * @example true
+       */
+      singlePieceAvailable: boolean;
+      /**
+       * @description Estimated shipping rate per kg BDT (labelled as ESTIMATE at API)
+       * @example 950
+       */
+      avgShippingRatePerKgBdt?: number;
+      /**
+       * @default 0
+       * @example 12
+       */
+      warrantyMonths: number;
+      /**
+       * @default false
+       * @example true
+       */
+      isGenuineCertified: boolean;
+      /**
+       * @description Weight in integer grams
+       * @example 187
+       */
+      estimatedWeightGrams?: number;
+      variants?: components['schemas']['CreateProductVariantDto'][];
+      media?: components['schemas']['CreateProductMediaDto'][];
+      /** @example true */
+      isActive?: boolean;
+    };
+    CreateCategoryDto: {
+      /** @example smartphones */
+      slug: string;
+      /** @example স্মার্টফোন */
+      nameBn: string;
+      /** @example Smartphones */
+      nameEn: string;
+      /**
+       * @description Parent category UUID if this is a subcategory
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      parentId?: string;
+      /** @example https://cdn.gadgetbazar.com/categories/phones.webp */
+      imageUrl?: string;
+    };
+  };
   responses: never;
   parameters: never;
   requestBodies: never;
@@ -120,6 +468,281 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Queue metrics payload */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogController_getCategories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Category tree retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogController_getProducts: {
+    parameters: {
+      query?: {
+        /** @description Base64 encoded cursor for pagination */
+        cursor?: string;
+        limit?: number;
+        /** @description Category slug or UUID (matches category and its subcategories) */
+        category?: string;
+        /** @description Brand name filter */
+        brand?: string;
+        /** @description Minimum retail price in BDT */
+        priceMin?: number;
+        /** @description Maximum retail price in BDT */
+        priceMax?: number;
+        /** @description Filter for single piece purchase (GadgetOne compatibility) */
+        singlePiece?: boolean;
+        /** @description Filter only products with available stock */
+        inStock?: boolean;
+        sort?: 'price_asc' | 'price_desc' | 'newest' | 'popular';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated public product list (confidential sourcing price redacted) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogController_search: {
+    parameters: {
+      query: {
+        /** @description Search term in Bengali or English */
+        q: string;
+        /** @description Max results (default 20) */
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Relevant product list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogController_compare: {
+    parameters: {
+      query: {
+        /** @description Comma-separated product UUIDs (minimum 2, maximum 4) */
+        ids: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Structured comparison matrix with bilingual attribute rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogController_getProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Product UUID or SKU code */
+        idOrSku: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Product detail */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Product not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CatalogController_getBundleSuggestions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Primary Product UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Bundle packages for the product */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminCatalogController_createProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateProductDto'];
+      };
+    };
+    responses: {
+      /** @description Product successfully created and queued for indexing */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminCatalogController_deleteProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Product UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Product soft deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminCatalogController_updateProduct: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Product UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProductDto'];
+      };
+    };
+    responses: {
+      /** @description Product updated and re-indexed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminCatalogController_createCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCategoryDto'];
+      };
+    };
+    responses: {
+      /** @description Category created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminCatalogController_updateCategory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Category UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Category updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AdminCatalogController_reindex: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description All active products indexed */
       200: {
         headers: {
           [name: string]: unknown;

@@ -16,6 +16,7 @@
     "start:worker": "ts-node src/worker.ts"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^9.5.1",
     "@gadgetbazar/shared": "workspace:*",
     "@nestjs/bullmq": "^10.2.3",
     "@nestjs/common": "^10.4.15",

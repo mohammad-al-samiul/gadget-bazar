@@ -42,6 +42,363 @@
         },
         "tags": ["Health"]
       }
+    },
+    "/v1/catalog/categories": {
+      "get": {
+        "operationId": "CatalogController_getCategories",
+        "summary": "Get 2-level category tree (parents and subcategories)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Category tree retrieved successfully"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/v1/catalog/products": {
+      "get": {
+        "operationId": "CatalogController_getProducts",
+        "summary": "Public product listing with cursor pagination, category/price/stock filters and sorting",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Base64 encoded cursor for pagination",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "Category slug or UUID (matches category and its subcategories)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "brand",
+            "required": false,
+            "in": "query",
+            "description": "Brand name filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceMin",
+            "required": false,
+            "in": "query",
+            "description": "Minimum retail price in BDT",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          },
+          {
+            "name": "priceMax",
+            "required": false,
+            "in": "query",
+            "description": "Maximum retail price in BDT",
+            "schema": {
+              "example": 50000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "singlePiece",
+            "required": false,
+            "in": "query",
+            "description": "Filter for single piece purchase (GadgetOne compatibility)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "inStock",
+            "required": false,
+            "in": "query",
+            "description": "Filter only products with available stock",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "newest",
+              "enum": ["price_asc", "price_desc", "newest", "popular"],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated public product list (confidential sourcing price redacted)"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/v1/catalog/search": {
+      "get": {
+        "operationId": "CatalogController_search",
+        "summary": "Full-text search with bilingual analyzer (Bengali + English) and typo tolerance",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Search term in Bengali or English",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Max results (default 20)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relevant product list"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/v1/catalog/compare": {
+      "get": {
+        "operationId": "CatalogController_compare",
+        "summary": "Compare 2 to 4 products across common specifications, weights, and price points",
+        "parameters": [
+          {
+            "name": "ids",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated product UUIDs (minimum 2, maximum 4)",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000,123e4567-e89b-12d3-a456-426614174001",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Structured comparison matrix with bilingual attribute rows"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/v1/catalog/products/{idOrSku}": {
+      "get": {
+        "operationId": "CatalogController_getProduct",
+        "summary": "Get single product details by UUID or SKU",
+        "parameters": [
+          {
+            "name": "idOrSku",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID or SKU code",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product detail"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/v1/catalog/products/{id}/bundle-suggestions": {
+      "get": {
+        "operationId": "CatalogController_getBundleSuggestions",
+        "summary": "Get accessory and complementary product bundle suggestions with bundled discount pricing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Primary Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bundle packages for the product"
+          }
+        },
+        "tags": ["Catalog"]
+      }
+    },
+    "/v1/admin/catalog/products": {
+      "post": {
+        "operationId": "AdminCatalogController_createProduct",
+        "summary": "Create new product with variants and media",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product successfully created and queued for indexing"
+          }
+        },
+        "tags": ["Admin Catalog"]
+      }
+    },
+    "/v1/admin/catalog/products/{id}": {
+      "patch": {
+        "operationId": "AdminCatalogController_updateProduct",
+        "summary": "Update product details, pricing, and specs",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated and re-indexed"
+          }
+        },
+        "tags": ["Admin Catalog"]
+      },
+      "delete": {
+        "operationId": "AdminCatalogController_deleteProduct",
+        "summary": "Soft-delete product and remove from search index",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Product UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product soft deleted"
+          }
+        },
+        "tags": ["Admin Catalog"]
+      }
+    },
+    "/v1/admin/catalog/categories": {
+      "post": {
+        "operationId": "AdminCatalogController_createCategory",
+        "summary": "Create a primary or 2nd-level subcategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully"
+          }
+        },
+        "tags": ["Admin Catalog"]
+      }
+    },
+    "/v1/admin/catalog/categories/{id}": {
+      "patch": {
+        "operationId": "AdminCatalogController_updateCategory",
+        "summary": "Update category",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Category UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category updated successfully"
+          }
+        },
+        "tags": ["Admin Catalog"]
+      }
+    },
+    "/v1/admin/catalog/reindex": {
+      "post": {
+        "operationId": "AdminCatalogController_reindex",
+        "summary": "Trigger complete catalog sync & Elasticsearch reindexing",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All active products indexed"
+          }
+        },
+        "tags": ["Admin Catalog"]
+      }
     }
   },
   "info": {
@@ -66,6 +423,264 @@
         "description": "Required for non-idempotent operations (checkout, group deal join, payments)"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "CreateProductVariantDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "8GB / 128GB - Midnight Black"
+          },
+          "skuSuffix": {
+            "type": "string",
+            "example": "-BLK-128"
+          },
+          "priceAdjustmentBdt": {
+            "type": "number",
+            "example": 0,
+            "default": 0
+          },
+          "stock": {
+            "type": "number",
+            "example": 50,
+            "default": 0
+          }
+        },
+        "required": ["name", "skuSuffix", "stock"]
+      },
+      "CreateProductMediaDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://cdn.gadgetbazar.com/products/img1.webp"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": ["IMAGE", "VIDEO"],
+            "default": "IMAGE"
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0,
+            "default": 0
+          },
+          "altText": {
+            "type": "string",
+            "example": "Front view"
+          }
+        },
+        "required": ["url"]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "GB-PHONE-001"
+          },
+          "categoryId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "titleBn": {
+            "type": "string",
+            "example": "শাওমি রেডমি নোট ১৩ প্রো"
+          },
+          "titleEn": {
+            "type": "string",
+            "example": "Xiaomi Redmi Note 13 Pro 5G"
+          },
+          "descriptionBn": {
+            "type": "string",
+            "example": "২০০ মেগাপিক্সেল ওআইএস ক্যামেরা সহ পাওয়ারফুল স্মার্টফোন।"
+          },
+          "descriptionEn": {
+            "type": "string",
+            "example": "Flagship-level 200MP camera with OIS and 67W turbo charge."
+          },
+          "sourcingPriceCny": {
+            "type": "number",
+            "example": 1250,
+            "description": "CONFIDENTIAL: Sourcing cost in CNY (Admin only, never returned to public)"
+          },
+          "retailPriceBdt": {
+            "type": "number",
+            "example": 26500
+          },
+          "dealerPriceBdt": {
+            "type": "number",
+            "example": 23500
+          },
+          "moq": {
+            "type": "number",
+            "example": 1,
+            "default": 1
+          },
+          "singlePieceAvailable": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "avgShippingRatePerKgBdt": {
+            "type": "number",
+            "example": 950,
+            "description": "Estimated shipping rate per kg BDT (labelled as ESTIMATE at API)"
+          },
+          "warrantyMonths": {
+            "type": "number",
+            "example": 12,
+            "default": 0
+          },
+          "isGenuineCertified": {
+            "type": "boolean",
+            "example": true,
+            "default": false
+          },
+          "estimatedWeightGrams": {
+            "type": "number",
+            "example": 187,
+            "description": "Weight in integer grams"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateProductVariantDto"
+            }
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateProductMediaDto"
+            }
+          }
+        },
+        "required": [
+          "sku",
+          "categoryId",
+          "titleBn",
+          "titleEn",
+          "sourcingPriceCny",
+          "retailPriceBdt",
+          "avgShippingRatePerKgBdt",
+          "estimatedWeightGrams"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "example": "GB-PHONE-001"
+          },
+          "categoryId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "titleBn": {
+            "type": "string",
+            "example": "শাওমি রেডমি নোট ১৩ প্রো"
+          },
+          "titleEn": {
+            "type": "string",
+            "example": "Xiaomi Redmi Note 13 Pro 5G"
+          },
+          "descriptionBn": {
+            "type": "string",
+            "example": "২০০ মেগাপিক্সেল ওআইএস ক্যামেরা সহ পাওয়ারফুল স্মার্টফোন।"
+          },
+          "descriptionEn": {
+            "type": "string",
+            "example": "Flagship-level 200MP camera with OIS and 67W turbo charge."
+          },
+          "sourcingPriceCny": {
+            "type": "number",
+            "example": 1250,
+            "description": "CONFIDENTIAL: Sourcing cost in CNY (Admin only, never returned to public)"
+          },
+          "retailPriceBdt": {
+            "type": "number",
+            "example": 26500
+          },
+          "dealerPriceBdt": {
+            "type": "number",
+            "example": 23500
+          },
+          "moq": {
+            "type": "number",
+            "example": 1,
+            "default": 1
+          },
+          "singlePieceAvailable": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          },
+          "avgShippingRatePerKgBdt": {
+            "type": "number",
+            "example": 950,
+            "description": "Estimated shipping rate per kg BDT (labelled as ESTIMATE at API)"
+          },
+          "warrantyMonths": {
+            "type": "number",
+            "example": 12,
+            "default": 0
+          },
+          "isGenuineCertified": {
+            "type": "boolean",
+            "example": true,
+            "default": false
+          },
+          "estimatedWeightGrams": {
+            "type": "number",
+            "example": 187,
+            "description": "Weight in integer grams"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateProductVariantDto"
+            }
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateProductMediaDto"
+            }
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "smartphones"
+          },
+          "nameBn": {
+            "type": "string",
+            "example": "স্মার্টফোন"
+          },
+          "nameEn": {
+            "type": "string",
+            "example": "Smartphones"
+          },
+          "parentId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "description": "Parent category UUID if this is a subcategory"
+          },
+          "imageUrl": {
+            "type": "string",
+            "example": "https://cdn.gadgetbazar.com/categories/phones.webp"
+          }
+        },
+        "required": ["slug", "nameBn", "nameEn"]
+      }
+    }
   }
 }
