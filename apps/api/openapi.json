@@ -3,7 +3,8 @@
   "paths": {
     "/v1/health": {
       "get": {
-        "operationId": "HealthController_check_v1",
+        "operationId": "HealthController_check",
+        "summary": "Comprehensive health check for DB and Redis",
         "parameters": [],
         "responses": {
           "200": {
@@ -13,20 +14,32 @@
             "description": "All core dependencies are down"
           }
         },
-        "summary": "Comprehensive health check for DB and Redis",
         "tags": ["Health"]
       }
     },
     "/v1/health/live": {
       "get": {
-        "operationId": "HealthController_getLiveness_v1",
+        "operationId": "HealthController_getLiveness",
+        "summary": "Liveness probe for container orchestrator",
         "parameters": [],
         "responses": {
           "200": {
             "description": "Application instance is live"
           }
         },
-        "summary": "Liveness probe for container orchestrator",
+        "tags": ["Health"]
+      }
+    },
+    "/v1/health/queues": {
+      "get": {
+        "operationId": "HealthController_getQueueMetrics",
+        "summary": "Queue depth, active tasks, lag, and dead-letter queue metrics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Queue metrics payload"
+          }
+        },
         "tags": ["Health"]
       }
     }

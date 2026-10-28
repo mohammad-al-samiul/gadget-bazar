@@ -1,12 +1,16 @@
-import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res, Optional } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { HealthService } from './health.service';
+import { QueueMetricsService } from '../queues/queue-metrics.service';
 
 @ApiTags('Health')
 @Controller({ version: '1', path: 'health' })
 export class HealthController {
-  constructor(private readonly healthService: HealthService) {}
+  constructor(
+    private readonly healthService: HealthService,
+    @Optional() private readonly queueMetricsService?: QueueMetricsService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Comprehensive health check for DB and Redis' })
@@ -25,5 +29,15 @@ export class HealthController {
   @ApiResponse({ status: 200, description: 'Application instance is live' })
   getLiveness() {
     return { status: 'ok', uptime: process.uptime() };
+  }
+
+  @Get('queues')
+  @ApiOperation({ summary: 'Queue depth, active tasks, lag, and dead-letter queue metrics' })
+  @ApiResponse({ status: 200, description: 'Queue metrics payload' })
+  async getQueueMetrics() {
+    if (!this.queueMetricsService) {
+      return { status: 'unavailable', message: 'Queue metrics service not initialized' };
+    }
+    return this.queueMetricsService.getMetrics();
   }
 }

@@ -12,7 +12,7 @@ export interface paths {
       cookie?: never;
     };
     /** Comprehensive health check for DB and Redis */
-    get: operations['HealthController_check_v1'];
+    get: operations['HealthController_check'];
     put?: never;
     post?: never;
     delete?: never;
@@ -29,7 +29,24 @@ export interface paths {
       cookie?: never;
     };
     /** Liveness probe for container orchestrator */
-    get: operations['HealthController_getLiveness_v1'];
+    get: operations['HealthController_getLiveness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/health/queues': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Queue depth, active tasks, lag, and dead-letter queue metrics */
+    get: operations['HealthController_getQueueMetrics'];
     put?: never;
     post?: never;
     delete?: never;
@@ -50,7 +67,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  HealthController_check_v1: {
+  HealthController_check: {
     parameters: {
       query?: never;
       header?: never;
@@ -75,7 +92,7 @@ export interface operations {
       };
     };
   };
-  HealthController_getLiveness_v1: {
+  HealthController_getLiveness: {
     parameters: {
       query?: never;
       header?: never;
@@ -85,6 +102,24 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Application instance is live */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  HealthController_getQueueMetrics: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Queue metrics payload */
       200: {
         headers: {
           [name: string]: unknown;
