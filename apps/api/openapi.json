@@ -399,6 +399,100 @@
         },
         "tags": ["Admin Catalog"]
       }
+    },
+    "/v1/media/upload-url": {
+      "post": {
+        "operationId": "MediaController_generateUploadUrl",
+        "summary": "Generate pre-signed direct upload PUT URL for Cloudflare R2 storage",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateUploadUrlDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pre-signed URL generated successfully for direct browser/client upload"
+          }
+        },
+        "tags": ["Media"]
+      }
+    },
+    "/v1/media/verify": {
+      "post": {
+        "operationId": "MediaController_verifyUpload",
+        "summary": "Verify uploaded object exists in R2 bucket and trigger thumbnail/WebP optimization",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyUploadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload verified and background media processing enqueued"
+          }
+        },
+        "tags": ["Media"]
+      }
+    },
+    "/v1/media/signed-url": {
+      "get": {
+        "operationId": "MediaController_getSignedUrl",
+        "summary": "Generate short-lived signed GET URL for accessing private files (NID, warranty, delivery proof)",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "query",
+            "description": "Object key of the private file",
+            "schema": {
+              "example": "nid/123e4567-e89b-12d3-a456-426614174000-nid.pdf",
+              "type": "string"
+            }
+          },
+          {
+            "name": "expiresInSeconds",
+            "required": false,
+            "in": "query",
+            "description": "URL expiration lifetime in seconds (maximum 900 seconds / 15 minutes)",
+            "schema": {
+              "default": 300,
+              "example": 300,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Temporary signed download URL returned (max 15 minutes lifetime)"
+          }
+        },
+        "tags": ["Media"]
+      }
+    },
+    "/v1/media/image-search-upload": {
+      "post": {
+        "operationId": "MediaController_generateImageSearchUpload",
+        "summary": "Generate temporary upload URL for image search with 2-hour TTL auto-deletion",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Temporary image search upload URL generated with automatic expiration"
+          }
+        },
+        "tags": ["Media"]
+      }
     }
   },
   "info": {
@@ -680,6 +774,69 @@
           }
         },
         "required": ["slug", "nameBn", "nameEn"]
+      },
+      "GenerateUploadUrlDto": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "example": "invoice_receipt.pdf",
+            "description": "Original file name including extension"
+          },
+          "contentType": {
+            "type": "string",
+            "example": "image/webp",
+            "description": "MIME type of the asset (image/jpeg, image/png, image/webp, application/pdf)",
+            "enum": ["image/jpeg", "image/png", "image/webp", "application/pdf"]
+          },
+          "fileSize": {
+            "type": "number",
+            "example": 1048576,
+            "description": "File size in bytes (max 10,485,760 bytes / 10MB)",
+            "minimum": 1,
+            "maximum": 10485760
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "review",
+              "deal",
+              "image_search",
+              "nid",
+              "warranty",
+              "delivery_proof"
+            ],
+            "example": "product",
+            "description": "Destination category (determines public vs private bucket routing)"
+          }
+        },
+        "required": ["fileName", "contentType", "fileSize", "category"]
+      },
+      "VerifyUploadDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "product/123e4567-e89b-12d3-a456-426614174000-headphones.webp",
+            "description": "Object key returned by the upload-url endpoint"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "review",
+              "deal",
+              "image_search",
+              "nid",
+              "warranty",
+              "delivery_proof"
+            ],
+            "example": "product",
+            "description": "Category where the file was uploaded"
+          }
+        },
+        "required": ["key", "category"]
       }
     }
   }

@@ -21,6 +21,13 @@ export const EnvSchema = z.object({
     .default(
       'http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003',
     ),
+  R2_ACCOUNT_ID: z.string().default('mock-r2-account'),
+  R2_ACCESS_KEY_ID: z.string().default('mock-access-key'),
+  R2_SECRET_ACCESS_KEY: z.string().default('mock-secret-key'),
+  R2_PUBLIC_BUCKET: z.string().default('gadgetbazar-public'),
+  R2_PUBLIC_URL: z.string().default('https://cdn.gadgetbazar.com'),
+  R2_PRIVATE_BUCKET: z.string().default('gadgetbazar-private'),
+  R2_ENDPOINT: z.string().optional(),
 });
 
 export type EnvConfig = z.infer<typeof EnvSchema>;

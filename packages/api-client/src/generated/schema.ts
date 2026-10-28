@@ -243,6 +243,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/v1/media/upload-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Generate pre-signed direct upload PUT URL for Cloudflare R2 storage */
+    post: operations['MediaController_generateUploadUrl'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/media/verify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Verify uploaded object exists in R2 bucket and trigger thumbnail/WebP optimization */
+    post: operations['MediaController_verifyUpload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/media/signed-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Generate short-lived signed GET URL for accessing private files (NID, warranty, delivery proof) */
+    get: operations['MediaController_getSignedUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/v1/media/image-search-upload': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Generate temporary upload URL for image search with 2-hour TTL auto-deletion */
+    post: operations['MediaController_generateImageSearchUpload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -405,6 +473,45 @@ export interface components {
       parentId?: string;
       /** @example https://cdn.gadgetbazar.com/categories/phones.webp */
       imageUrl?: string;
+    };
+    GenerateUploadUrlDto: {
+      /**
+       * @description Original file name including extension
+       * @example invoice_receipt.pdf
+       */
+      fileName: string;
+      /**
+       * @description MIME type of the asset (image/jpeg, image/png, image/webp, application/pdf)
+       * @example image/webp
+       * @enum {string}
+       */
+      contentType: 'image/jpeg' | 'image/png' | 'image/webp' | 'application/pdf';
+      /**
+       * @description File size in bytes (max 10,485,760 bytes / 10MB)
+       * @example 1048576
+       */
+      fileSize: number;
+      /**
+       * @description Destination category (determines public vs private bucket routing)
+       * @example product
+       * @enum {string}
+       */
+      category:
+        'product' | 'review' | 'deal' | 'image_search' | 'nid' | 'warranty' | 'delivery_proof';
+    };
+    VerifyUploadDto: {
+      /**
+       * @description Object key returned by the upload-url endpoint
+       * @example product/123e4567-e89b-12d3-a456-426614174000-headphones.webp
+       */
+      key: string;
+      /**
+       * @description Category where the file was uploaded
+       * @example product
+       * @enum {string}
+       */
+      category:
+        'product' | 'review' | 'deal' | 'image_search' | 'nid' | 'warranty' | 'delivery_proof';
     };
   };
   responses: never;
@@ -744,6 +851,91 @@ export interface operations {
     responses: {
       /** @description All active products indexed */
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MediaController_generateUploadUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GenerateUploadUrlDto'];
+      };
+    };
+    responses: {
+      /** @description Pre-signed URL generated successfully for direct browser/client upload */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MediaController_verifyUpload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VerifyUploadDto'];
+      };
+    };
+    responses: {
+      /** @description Upload verified and background media processing enqueued */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MediaController_getSignedUrl: {
+    parameters: {
+      query: {
+        /** @description Object key of the private file */
+        key: string;
+        /** @description URL expiration lifetime in seconds (maximum 900 seconds / 15 minutes) */
+        expiresInSeconds?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Temporary signed download URL returned (max 15 minutes lifetime) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MediaController_generateImageSearchUpload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Temporary image search upload URL generated with automatic expiration */
+      201: {
         headers: {
           [name: string]: unknown;
         };

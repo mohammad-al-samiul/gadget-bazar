@@ -16,6 +16,8 @@
     "start:worker": "ts-node src/worker.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1157.0",
+    "@aws-sdk/s3-request-presigner": "^3.1157.0",
     "@elastic/elasticsearch": "^9.5.1",
     "@gadgetbazar/shared": "workspace:*",
     "@nestjs/bullmq": "^10.2.3",
