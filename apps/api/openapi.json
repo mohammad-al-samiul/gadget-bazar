@@ -1,0 +1,58 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "HealthController_check_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is operational or degraded"
+          },
+          "503": {
+            "description": "All core dependencies are down"
+          }
+        },
+        "summary": "Comprehensive health check for DB and Redis",
+        "tags": ["Health"]
+      }
+    },
+    "/v1/health/live": {
+      "get": {
+        "operationId": "HealthController_getLiveness_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Application instance is live"
+          }
+        },
+        "summary": "Liveness probe for container orchestrator",
+        "tags": ["Health"]
+      }
+    }
+  },
+  "info": {
+    "title": "GadgetBazar API",
+    "description": "High-performance China-import gadget marketplace API for Bangladesh. Implements two-stage checkout, idempotent payments, and RBAC.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "idempotency": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Idempotency-Key",
+        "description": "Required for non-idempotent operations (checkout, group deal join, payments)"
+      }
+    },
+    "schemas": {}
+  }
+}
